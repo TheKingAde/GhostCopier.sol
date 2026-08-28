@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ session.name }} · GhostCopier{% endblock %}
+{% block content %}
+<div id="session-app" data-session-id="{{ session.id }}">
+
+<section class="page-head session-head">
+  <div>
+    <a href="/" class="back-link">← Sessions</a>
+    <div class="session-title-row">
+      <h1 class="page-title" id="session-name">{{ session.name }}</h1>
+      <span class="status-badge" id="session-status-badge">—</span>
+    </div>
+    <p class="page-sub" id="session-error-banner"></p>
+  </div>
+  <div class="session-controls">
+    <button class="btn btn-ghost" id="btn-start" title="Start">▶ Start</button>
+    <button class="btn btn-ghost" id="btn-pause" title="Pause">⏸ Pause</button>
+    <button class="btn btn-ghost" id="btn-stop" title="Stop">⏹ Stop</button>
+    <button class="btn btn-danger" id="btn-delete" title="Delete session">🗑 Delete</button>
+  </div>
+</section>
+
+<section class="balance-grid">
+  <div class="balance-card hero">
+    <div class="stat-label">Paper balance</div>
+    <div class="balance-sol" id="bal-sol">0.0000 SOL</div>
+    <div class="balance-usd" id="bal-usd">$0.00</div>
+  </div>
+  <div class="balance-card">
+    <div class="stat-label">Total value (balance + holdings)</div>
+    <div class="stat-value" id="bal-total-usd">$0.00</div>
+  </div>
+  <div class="balance-card">
+    <div class="stat-label">Unrealized PnL</div>
+    <div class="stat-value" id="bal-pnl">$0.00</div>
+    <div class="stat-sub" id="bal-pnl-pct">0.00%</div>
+  </div>
+  <div class="balance-card">
+    <div class="stat-label">Realized PnL</div>
+    <div class="stat-value" id="bal-realized">$0.00</div>
+  </div>
+  <div class="balance-card">
+    <div class="stat-label">Started with</div>
+    <div class="stat-value" id="bal-start">$0.00</div>
+    <div class="stat-sub" id="bal-start-sol">0 SOL @ $0</div>
+  </div>
+</section>
+
+<div class="two-col">
+  <section class="panel wallets-panel">
+    <div class="panel-head">
+      <h2>Wallets being copied</h2>
+    </div>
+    <div id="wallets-list" class="wallets-list"></div>
+    <form id="form-add-wallet" class="add-wallet-form">
+      <input type="text" id="add-wallet-input" placeholder="Add another wallet address…" required>
+      <button type="submit" class="btn btn-primary btn-sm">Add</button>
+    </form>
+    <div class="form-error hidden" id="wallet-form-error"></div>
+  </section>
+
+  <section class="panel positions-panel">
+    <div class="panel-head">
+      <h2>Open positions</h2>
+    </div>
+    <div id="positions-empty" class="empty-state small hidden">
+      <p>No open positions yet. Trades will appear here once a copied wallet buys something.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="positions-table">
+        <thead>
+          <tr><th>Token</th><th>Amount</th><th>Avg cost</th><th>Value</th></tr>
+        </thead>
+        <tbody id="positions-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Trade history</h2>
+    <span class="panel-sub">Every fill GhostCopier simulated, and the wallet it was copied from</span>
+  </div>
+  <div id="trades-empty" class="empty-state hidden">
+    <div class="empty-ghost">👻</div>
+    <h3>No trades yet</h3>
+    <p>GhostCopier is watching. As soon as a copied wallet swaps, the paper fill shows up here.</p>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table trades-table" id="trades-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Side</th>
+          <th>Token</th>
+          <th>Amount</th>
+          <th>Price</th>
+          <th>SOL</th>
+          <th>USD value</th>
+          <th>Copied from</th>
+          <th>Balance after</th>
+          <th>Tx</th>
+        </tr>
+      </thead>
+      <tbody id="trades-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/session.js"></script>
+{% endblock %}

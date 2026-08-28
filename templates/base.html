@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}GhostCopier{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2218%22 font-size=%2218%22>%F0%9F%91%BB</text></svg>">
+</head>
+<body>
+<div class="ghost-field" aria-hidden="true">
+  <span class="ghost-glyph g1">👻</span>
+  <span class="ghost-glyph g2">👻</span>
+  <span class="ghost-glyph g3">👻</span>
+</div>
+
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark">👻</span>
+    <span class="brand-text">Ghost<span class="brand-accent">Copier</span></span>
+  </a>
+  <div class="topbar-right">
+    <div class="sol-price-pill" id="sol-price-pill">
+      <span class="dot pulse"></span>
+      <span>SOL</span>
+      <span id="sol-price-value">—</span>
+    </div>
+    <a href="/" class="nav-link">Sessions</a>
+  </div>
+</header>
+
+<main class="page">
+{% block content %}{% endblock %}
+</main>
+
+<div id="toast-root" class="toast-root"></div>
+
+<script src="/static/js/api.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

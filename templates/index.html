@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}GhostCopier · Sessions{% endblock %}
+{% block content %}
+
+<section class="page-head">
+  <div>
+    <h1 class="page-title">Paper copy-trading sessions</h1>
+    <p class="page-sub">Shadow any Solana wallet. Trade its moves with fake money, in real time.</p>
+  </div>
+  <button class="btn btn-primary" id="btn-new-session">
+    <span class="plus">+</span> New session
+  </button>
+</section>
+
+<section class="stats-row" id="global-stats">
+  <div class="stat-card">
+    <div class="stat-label">Sessions</div>
+    <div class="stat-value" id="stat-total-sessions">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Live</div>
+    <div class="stat-value stat-live" id="stat-live-sessions">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total paper equity</div>
+    <div class="stat-value" id="stat-total-equity">$0.00</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Combined PnL</div>
+    <div class="stat-value" id="stat-total-pnl">$0.00</div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Sessions</h2>
+  </div>
+
+  <div id="sessions-empty" class="empty-state hidden">
+    <div class="empty-ghost">👻</div>
+    <h3>No sessions yet</h3>
+    <p>Spin one up — drop a wallet address, set a starting balance, and GhostCopier will start shadowing its trades.</p>
+    <button class="btn btn-primary" id="btn-new-session-empty">+ New session</button>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table" id="sessions-table">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Session</th>
+          <th>Wallets</th>
+          <th>Balance</th>
+          <th>PnL</th>
+          <th>Started</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="sessions-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- New session modal -->
+<div class="modal-backdrop hidden" id="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>New copy session</h3>
+      <button class="modal-close" id="modal-close">×</button>
+    </div>
+    <form id="form-new-session">
+      <label class="field">
+        <span class="field-label">Session name</span>
+        <input type="text" name="name" placeholder="e.g. Whale #1 shadow" maxlength="60">
+      </label>
+
+      <label class="field">
+        <span class="field-label">Starting paper balance (USD)</span>
+        <input type="number" name="start_amount_usd" placeholder="1000" min="1" step="any" required>
+        <span class="field-hint" id="sol-preview">≈ 0 SOL at current price</span>
+      </label>
+
+      <div class="field">
+        <span class="field-label">Wallets to copy</span>
+        <div id="wallet-inputs" class="wallet-inputs">
+          <div class="wallet-input-row">
+            <input type="text" class="wallet-address-input" placeholder="Solana wallet address" required>
+            <button type="button" class="icon-btn remove-wallet-row" title="Remove">×</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-add-wallet-row">+ Add another wallet</button>
+      </div>
+
+      <div class="field-grid">
+        <label class="field">
+          <span class="field-label">Sizing strategy</span>
+          <select name="sizing_mode" id="sizing-mode">
+            <option value="proportional" selected>Mirror wallet %</option>
+            <option value="fixed_pct">Fixed % per trade</option>
+          </select>
+          <span class="field-hint">Mirror wallet % copies the same portion of balance they used. Fixed % always risks the same slice of your paper balance.</span>
+        </label>
+        <label class="field">
+          <span class="field-label" id="sizing-pct-label">Size per trade (%)</span>
+          <input type="number" name="sizing_pct" value="10" min="0.1" max="100" step="any">
+        </label>
+      </div>
+
+      <div class="field-grid">
+        <label class="field">
+          <span class="field-label">Simulated slippage (%)</span>
+          <input type="number" name="slippage_pct" value="0.5" min="0" max="20" step="any">
+        </label>
+        <label class="field">
+          <span class="field-label">Simulated fee (%)</span>
+          <input type="number" name="fee_pct" value="0.3" min="0" max="20" step="any">
+        </label>
+      </div>
+
+      <div class="form-error hidden" id="form-error"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btn-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create &amp; start session</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}
