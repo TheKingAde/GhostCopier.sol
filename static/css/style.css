@@ -4,6 +4,12 @@
    crimson for losses/sells, spectral violet as the "ghost" signature.
    Type: Chakra Petch (display/technical), Inter (UI/body),
          JetBrains Mono (numeric/data).
+   Responsive: mobile-first breakpoints layered on top of the
+   original desktop rules. Breakpoints used throughout:
+     1024px — tablet landscape / small desktop
+      768px — tablet portrait
+      640px — large phone
+      420px — small phone
 ========================================================= */
 :root{
   --bg:            #08090b;
@@ -42,12 +48,15 @@
 
 *{ box-sizing: border-box; }
 
+html{ -webkit-text-size-adjust: 100%; }
+
 html, body{
   margin:0; padding:0;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   min-height: 100vh;
+  overflow-x: hidden; /* guard against any stray overflow on small screens */
 }
 
 body{
@@ -88,6 +97,10 @@ button{ font-family: inherit; }
 @media (prefers-reduced-motion: reduce){
   .ghost-glyph, .pulse, .status-badge.running .dot{ animation: none !important; }
 }
+@media (max-width: 640px){
+  /* smaller, fewer glyphs read as clutter on small screens */
+  .ghost-glyph{ font-size: 70px; }
+}
 
 /* ---------------------------------------------------------- top bar */
 .topbar{
@@ -98,6 +111,7 @@ button{ font-family: inherit; }
   background: rgba(8,9,11,0.75);
   backdrop-filter: blur(10px);
   position: sticky; top: 0;
+  gap: 12px;
 }
 .brand{ display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: 0.02em; }
 .brand-mark{ font-size: 22px; filter: drop-shadow(0 0 10px var(--ghost-glow)); }
@@ -115,13 +129,31 @@ button{ font-family: inherit; }
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--text-dim);
+  white-space: nowrap;
 }
 .sol-price-pill #sol-price-value{ color: var(--mint); font-weight: 600; }
-.dot{ width: 7px; height: 7px; border-radius: 50%; background: var(--mint); }
+.dot{ width: 7px; height: 7px; border-radius: 50%; background: var(--mint); flex-shrink: 0; }
 .dot.pulse{ animation: pulse 1.8s ease-in-out infinite; }
 @keyframes pulse{
   0%,100%{ box-shadow: 0 0 0 0 var(--mint-glow); }
   50%{ box-shadow: 0 0 0 5px transparent; }
+}
+
+@media (max-width: 768px){
+  .topbar{ padding: 14px 18px; }
+  .brand{ font-size: 17px; }
+  .brand-mark{ font-size: 19px; }
+  .topbar-right{ gap: 12px; }
+  .nav-link{ font-size: 13px; }
+}
+@media (max-width: 640px){
+  .topbar{ flex-wrap: wrap; row-gap: 10px; }
+  .topbar-right{ order: 3; width: 100%; justify-content: space-between; }
+  .nav-link{ display: none; } /* keep primary actions, hide secondary nav links on phones */
+  .nav-link.always-show{ display: inline-block; }
+}
+@media (max-width: 420px){
+  .sol-price-pill{ font-size: 12px; padding: 5px 10px; }
 }
 
 /* ------------------------------------------------------------- page */
@@ -132,6 +164,20 @@ button{ font-family: inherit; }
 .page-sub{ color: var(--text-dim); margin: 0; font-size: 14px; }
 .back-link{ color: var(--text-dim); font-size: 13px; display: inline-block; margin-bottom: 10px; }
 .back-link:hover{ color: var(--ghost); }
+
+@media (max-width: 1024px){
+  .page{ padding: 26px 24px 64px; }
+}
+@media (max-width: 640px){
+  .page{ padding: 20px 16px 56px; }
+  .page-head{ align-items: flex-start; }
+  .page-title{ font-size: 22px; }
+  .page-sub{ font-size: 13px; }
+}
+@media (max-width: 420px){
+  .page{ padding: 16px 12px 48px; }
+  .page-title{ font-size: 20px; }
+}
 
 /* ------------------------------------------------------------ buttons */
 .btn{
@@ -163,8 +209,20 @@ button{ font-family: inherit; }
   width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
   background: var(--surface); color: var(--text-dim); cursor: pointer; font-size: 16px;
   display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
 .icon-btn:hover{ color: var(--crimson); border-color: var(--crimson-dim); }
+
+@media (max-width: 640px){
+  /* buttons get a slightly larger tap target and can go full-width when stacked */
+  .btn{ padding: 11px 16px; font-size: 14px; }
+  .page-head .btn,
+  .panel-head .btn{ width: 100%; justify-content: center; }
+  .page-head, .panel-head{ flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 420px){
+  .icon-btn{ width: 34px; height: 34px; } /* easier to tap on small phones */
+}
 
 /* ------------------------------------------------------------- stats */
 .stats-row{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
@@ -176,6 +234,15 @@ button{ font-family: inherit; }
 .stat-value{ font-family: var(--font-mono); font-size: 22px; font-weight: 600; }
 .stat-sub{ font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); margin-top: 4px; }
 .stat-live{ color: var(--mint); }
+
+@media (max-width: 1024px){
+  .stats-row{ grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 420px){
+  .stats-row{ grid-template-columns: 1fr; gap: 10px; }
+  .stat-card{ padding: 14px 16px; }
+  .stat-value{ font-size: 20px; }
+}
 
 /* ------------------------------------------------------------- panel */
 .panel{
@@ -189,8 +256,13 @@ button{ font-family: inherit; }
 .two-col{ display: grid; grid-template-columns: 1fr 1.4fr; gap: 20px; align-items: start; }
 @media (max-width: 900px){ .two-col{ grid-template-columns: 1fr; } .stats-row{ grid-template-columns: repeat(2,1fr); } }
 
+@media (max-width: 640px){
+  .panel{ padding: 16px 14px; border-radius: var(--radius-md); }
+  .panel-head h2{ font-size: 15px; }
+}
+
 /* -------------------------------------------------------------- table */
-.table-wrap{ overflow-x: auto; }
+.table-wrap{ overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .data-table{ width: 100%; border-collapse: collapse; font-size: 13px; }
 .data-table thead th{
   text-align: left; font-weight: 600; color: var(--text-faint); text-transform: uppercase;
@@ -204,6 +276,14 @@ button{ font-family: inherit; }
 .data-table tbody tr.clickable{ cursor: pointer; }
 .mono{ font-family: var(--font-mono); }
 
+@media (max-width: 640px){
+  /* keep the table intact (nothing breaks / reflows unpredictably) and let
+     it scroll horizontally inside its card instead of squashing columns */
+  .data-table{ font-size: 12px; }
+  .data-table thead th,
+  .data-table tbody td{ padding: 9px 10px; }
+}
+
 /* ------------------------------------------------------------- badges */
 .status-badge{
   display: inline-flex; align-items: center; gap: 6px;
@@ -211,6 +291,7 @@ button{ font-family: inherit; }
   text-transform: uppercase; letter-spacing: 0.05em;
   border: 1px solid var(--border);
   color: var(--text-dim);
+  white-space: nowrap;
 }
 .status-badge .dot{ background: currentColor; }
 .status-badge.running{ color: var(--mint); border-color: var(--mint-dim); background: rgba(0,255,163,0.06); }
@@ -235,14 +316,21 @@ button{ font-family: inherit; }
 
 /* session-head */
 .session-head{ align-items: center; }
-.session-title-row{ display: flex; align-items: center; gap: 12px; }
-.session-controls{ display: flex; gap: 8px; }
+.session-title-row{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.session-controls{ display: flex; gap: 8px; flex-wrap: wrap; }
 #session-error-banner{ color: var(--crimson); font-size: 13px; }
 #session-error-banner:empty{ display: none; }
+
+@media (max-width: 640px){
+  .session-controls{ width: 100%; }
+  .session-controls .btn{ flex: 1; }
+}
 
 /* balances */
 .balance-grid{ display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
 @media (max-width: 1000px){ .balance-grid{ grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 420px){ .balance-grid{ grid-template-columns: 1fr; gap: 10px; } }
+
 .balance-card{
   background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg);
   padding: 16px 18px;
@@ -254,6 +342,11 @@ button{ font-family: inherit; }
 .balance-sol{ font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--mint); }
 .balance-usd{ font-family: var(--font-mono); font-size: 13px; color: var(--text-dim); margin-top: 2px; }
 
+@media (max-width: 420px){
+  .balance-card{ padding: 14px 16px; }
+  .balance-sol{ font-size: 21px; }
+}
+
 /* wallets list */
 .wallets-list{ display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
 .wallet-row{
@@ -263,7 +356,13 @@ button{ font-family: inherit; }
 .wallet-row .addr{ font-family: var(--font-mono); font-size: 13px; color: var(--text); }
 .wallet-row .addr-full{ display:none; }
 .add-wallet-form{ display: flex; gap: 8px; }
-.add-wallet-form input{ flex: 1; }
+.add-wallet-form input{ flex: 1; min-width: 0; } /* min-width:0 lets long addresses truncate instead of overflowing */
+
+@media (max-width: 640px){
+  .wallet-row{ flex-wrap: wrap; }
+  .wallet-row .addr{ font-size: 12px; word-break: break-all; white-space: normal; }
+  .add-wallet-form{ flex-direction: column; }
+}
 
 /* form fields */
 .field{ display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
@@ -274,6 +373,7 @@ input[type=text], input[type=number], select{
   background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text);
   padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font-mono);
   outline: none;
+  width: 100%;
 }
 select{ font-family: var(--font-body); }
 input:focus, select:focus{ border-color: var(--ghost); box-shadow: 0 0 0 3px rgba(155,107,255,0.15); }
@@ -282,7 +382,16 @@ input:focus, select:focus{ border-color: var(--ghost); box-shadow: 0 0 0 3px rgb
 
 .wallet-inputs{ display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
 .wallet-input-row{ display: flex; gap: 8px; }
-.wallet-input-row input{ flex: 1; }
+.wallet-input-row input{ flex: 1; min-width: 0; }
+
+@media (max-width: 640px){
+  .field-grid{ grid-template-columns: 1fr; gap: 12px; }
+  /* 16px min font-size on inputs prevents iOS Safari from auto-zooming on focus */
+  input[type=text], input[type=number], select{ font-size: 16px; }
+}
+@media (max-width: 480px){
+  .wallet-input-row{ flex-direction: column; }
+}
 
 /* modal */
 .modal-backdrop{
@@ -299,12 +408,29 @@ input:focus, select:focus{ border-color: var(--ghost); box-shadow: 0 0 0 3px rgb
 .modal-close{ background: none; border: none; color: var(--text-dim); font-size: 22px; cursor: pointer; line-height: 1; }
 .modal-actions{ display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
 
+@media (max-width: 640px){
+  .modal-backdrop{ padding: 0; align-items: flex-end; } /* bottom-sheet style on phones */
+  .modal{
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+  .modal-actions{ flex-direction: column-reverse; gap: 8px; }
+  .modal-actions .btn{ width: 100%; justify-content: center; }
+}
+
 /* empty states */
 .empty-state{ text-align: center; padding: 50px 20px; color: var(--text-dim); }
 .empty-state.small{ padding: 24px 10px; }
 .empty-ghost{ font-size: 40px; margin-bottom: 10px; filter: drop-shadow(0 0 16px var(--ghost-glow)); opacity: .8; }
 .empty-state h3{ font-family: var(--font-display); color: var(--text); margin: 0 0 6px; }
 .empty-state p{ max-width: 400px; margin: 0 auto 16px; font-size: 13px; }
+
+@media (max-width: 420px){
+  .empty-state{ padding: 36px 14px; }
+  .empty-ghost{ font-size: 32px; }
+}
 
 /* toasts */
 .toast-root{ position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
@@ -317,6 +443,13 @@ input:focus, select:focus{ border-color: var(--ghost); box-shadow: 0 0 0 3px rgb
 .toast.error{ border-color: var(--crimson-dim); color: var(--crimson); }
 .toast.success{ border-color: var(--mint-dim); color: var(--mint); }
 @keyframes toast-in{ from{ opacity:0; transform: translateY(10px);} to{ opacity:1; transform: translateY(0);} }
+
+@media (max-width: 640px){
+  .toast-root{
+    left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+  .toast{ min-width: 0; width: 100%; }
+}
 
 .solscan-link{ color: var(--text-faint); font-size: 12px; }
 .solscan-link:hover{ color: var(--ghost); }
