@@ -11,9 +11,18 @@ from . import paper_trader
 from .solana_client import SolanaClient
 from .trade_parser import parse_swap_for_wallet
 from .config import Config
+from logging.handlers import RotatingFileHandler
 
 log = logging.getLogger("ghostcopier.monitor")
 logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    handlers=[
+        RotatingFileHandler("ghostcopier.log", maxBytes=5_000_000, backupCount=3),
+        logging.StreamHandler(),  # keep console output too
+    ],
+)
 
 _tasks: dict[str, asyncio.Task] = {}
 _clients: dict[str, SolanaClient] = {}
