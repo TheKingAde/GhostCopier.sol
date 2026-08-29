@@ -13,6 +13,7 @@ from .trade_parser import parse_swap_for_wallet
 from .config import Config
 
 log = logging.getLogger("ghostcopier.monitor")
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 _tasks: dict[str, asyncio.Task] = {}
 _clients: dict[str, SolanaClient] = {}

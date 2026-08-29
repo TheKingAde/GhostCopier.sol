@@ -322,8 +322,26 @@ button{ font-family: inherit; }
 #session-error-banner:empty{ display: none; }
 
 @media (max-width: 640px){
-  .session-controls{ width: 100%; }
-  .session-controls .btn{ flex: 1; }
+  .session-controls{
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .session-controls .btn{
+    width: 100%;
+    justify-content: center;
+    padding: 10px 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* very small phones: stack to a single column so nothing ever gets tight */
+@media (max-width: 380px){
+  .session-controls{ grid-template-columns: 1fr; }
 }
 
 /* balances */
