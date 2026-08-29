@@ -315,7 +315,7 @@ button{ font-family: inherit; }
 .copied-from::before{ content: "👻"; font-size: 12px; opacity: .8; }
 
 /* session-head */
-.session-head{ align-items: center; }
+/* .session-head{ align-items: center; } */
 .session-title-row{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .session-controls{ display: flex; gap: 8px; flex-wrap: wrap; }
 #session-error-banner{ color: var(--crimson); font-size: 13px; }
