@@ -131,7 +131,6 @@ async def session_summary(session: dict):
     sol_price = await get_sol_price_usd()
     positions = await db.list_positions(session["id"])
 
-    unrealized_usd = 0.0
     for p in positions:
         # Without live per-token pricing we value holdings at cost basis;
         # unrealized PnL for open positions is therefore shown as 0 unless
@@ -141,16 +140,23 @@ async def session_summary(session: dict):
 
     sol_balance = session["sol_balance"]
     balance_usd = sol_balance * sol_price
-    start_usd = session["start_amount_usd"]
-    pnl_usd = (balance_usd + sum(p["cost_value_usd"] for p in positions)) - start_usd
-    pnl_pct = (pnl_usd / start_usd * 100) if start_usd else 0
+    holdings_value_usd = sum(p["cost_value_usd"] for p in positions)
+    contributed_usd = session["start_amount_usd"] + session.get("deposited_amount_usd", 0)
+    total_value_usd = balance_usd + holdings_value_usd
+    pnl_usd = total_value_usd - contributed_usd
+    unrealized_pnl_usd = pnl_usd - session["realized_pnl_usd"]
+    pnl_pct = (pnl_usd / contributed_usd * 100) if contributed_usd else 0
+    unrealized_pnl_pct = (unrealized_pnl_usd / contributed_usd * 100) if contributed_usd else 0
 
     out = dict(session)
     out["sol_price_usd"] = sol_price
     out["balance_usd"] = balance_usd
     out["positions"] = positions
-    out["holdings_value_usd"] = sum(p["cost_value_usd"] for p in positions)
-    out["total_value_usd"] = balance_usd + out["holdings_value_usd"]
+    out["contributed_amount_usd"] = contributed_usd
+    out["holdings_value_usd"] = holdings_value_usd
+    out["total_value_usd"] = total_value_usd
     out["pnl_usd"] = pnl_usd
+    out["unrealized_pnl_usd"] = unrealized_pnl_usd
+    out["unrealized_pnl_pct"] = unrealized_pnl_pct
     out["pnl_pct"] = pnl_pct
     return out

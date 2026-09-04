@@ -320,6 +320,17 @@ button{ font-family: inherit; }
 .session-controls{ display: flex; gap: 8px; flex-wrap: wrap; }
 #session-error-banner{ color: var(--crimson); font-size: 13px; }
 #session-error-banner:empty{ display: none; }
+.top-up-panel{ padding-bottom: 4px; }
+.top-up-form{ display: flex; gap: 12px; }
+.top-up-form .field{ flex: 1; margin-bottom: 0; }
+.top-up-actions{ display: flex; gap: 8px; padding-bottom: 16px; }
+.top-up-error{ margin: 0; }
+
+@media (max-width: 640px){
+  .top-up-form{ align-items: stretch; flex-direction: column; gap: 8px; }
+  .top-up-actions{ padding-bottom: 0; flex-direction: column; }
+  .top-up-actions .btn{ width: 100%; justify-content: center; }
+}
 
 @media (max-width: 640px){
   .session-controls{

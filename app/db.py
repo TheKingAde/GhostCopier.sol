@@ -86,6 +86,11 @@ async def init_db():
     _db.row_factory = aiosqlite.Row
     await _db.execute("PRAGMA foreign_keys = ON")
     await _db.executescript(SCHEMA)
+    columns = await _db.execute_fetchall("PRAGMA table_info(sessions)")
+    if not any(column[1] == "deposited_amount_usd" for column in columns):
+        await _db.execute(
+            "ALTER TABLE sessions ADD COLUMN deposited_amount_usd REAL NOT NULL DEFAULT 0"
+        )
     await _db.commit()
     return _db
 
@@ -170,6 +175,20 @@ async def update_session_balance(session_id, sol_balance, realized_pnl_delta=0.0
             (sol_balance, realized_pnl_delta, now(), session_id),
         )
         await db.commit()
+
+
+async def top_up_session(session_id, amount_usd, sol_price):
+    db = await get_db()
+    sol_amount = amount_usd / sol_price
+    async with _lock:
+        await db.execute(
+            """UPDATE sessions
+               SET sol_balance = sol_balance + ?, deposited_amount_usd = deposited_amount_usd + ?,
+                   updated_at = ? WHERE id = ?""",
+            (sol_amount, amount_usd, now(), session_id),
+        )
+        await db.commit()
+    return sol_amount
 
 
 async def delete_session(session_id):

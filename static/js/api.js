@@ -27,6 +27,7 @@ const Api = {
   startSession(id) { return this.post(`/api/sessions/${id}/start`); },
   pauseSession(id) { return this.post(`/api/sessions/${id}/pause`); },
   stopSession(id) { return this.post(`/api/sessions/${id}/stop`); },
+  topUpSession(id, amountUsd) { return this.post(`/api/sessions/${id}/top-up`, { amount_usd: amountUsd }); },
 
   listWallets(id) { return this.get(`/api/sessions/${id}/wallets`); },
   addWallet(id, address, label) { return this.post(`/api/sessions/${id}/wallets`, { address, label }); },

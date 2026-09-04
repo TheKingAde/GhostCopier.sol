@@ -1,3 +1,5 @@
+import math
+
 from quart import Blueprint, render_template, jsonify, request, abort
 
 from . import db
@@ -142,6 +144,27 @@ async def api_stop_session(session_id):
         abort(404)
     await monitor.stop_session(session_id)
     return jsonify({"ok": True, "status": "stopped"})
+
+
+@bp.post("/api/sessions/<session_id>/top-up")
+async def api_top_up_session(session_id):
+    if not await db.get_session(session_id):
+        abort(404)
+    data = await request.get_json(force=True, silent=True) or {}
+    try:
+        amount_usd = float(data.get("amount_usd"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "amount_usd must be a number"}), 400
+    if not math.isfinite(amount_usd) or amount_usd <= 0:
+        return jsonify({"error": "Top-up amount must be greater than 0"}), 400
+
+    sol_price = await get_sol_price_usd()
+    sol_amount = await db.top_up_session(session_id, amount_usd, sol_price)
+    session = await db.get_session(session_id)
+    summary = await paper_trader.session_summary(session)
+    summary["top_up_amount_usd"] = amount_usd
+    summary["top_up_amount_sol"] = sol_amount
+    return jsonify(summary)
 
 
 # ----------------------------------------------------------- wallets API

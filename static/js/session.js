@@ -12,6 +12,12 @@ const els = {
   btnPause: document.getElementById("btn-pause"),
   btnStop: document.getElementById("btn-stop"),
   btnDelete: document.getElementById("btn-delete"),
+  btnTopUp: document.getElementById("btn-top-up"),
+  topUpPanel: document.getElementById("top-up-panel"),
+  topUpForm: document.getElementById("form-top-up"),
+  topUpAmount: document.getElementById("top-up-amount"),
+  cancelTopUp: document.getElementById("btn-cancel-top-up"),
+  topUpError: document.getElementById("top-up-error"),
 
   balSol: document.getElementById("bal-sol"),
   balUsd: document.getElementById("bal-usd"),
@@ -63,9 +69,9 @@ function renderSession(s) {
   els.balUsd.textContent = Fmt.usd(s.balance_usd);
   els.balTotalUsd.textContent = Fmt.usd(s.total_value_usd);
 
-  els.balPnl.textContent = Fmt.usd(s.pnl_usd);
-  els.balPnl.className = `stat-value ${Fmt.pnlClass(s.pnl_usd)}`;
-  els.balPnlPct.textContent = Fmt.pct(s.pnl_pct);
+  els.balPnl.textContent = Fmt.usd(s.unrealized_pnl_usd);
+  els.balPnl.className = `stat-value ${Fmt.pnlClass(s.unrealized_pnl_usd)}`;
+  els.balPnlPct.textContent = Fmt.pct(s.unrealized_pnl_pct);
 
   els.balRealized.textContent = Fmt.usd(s.realized_pnl_usd);
   els.balRealized.className = `stat-value ${Fmt.pnlClass(s.realized_pnl_usd)}`;
@@ -163,6 +169,31 @@ els.btnDelete.addEventListener("click", async () => {
     toast("Session deleted", "success");
     window.location.href = "/";
   } catch (err) { toast(err.message, "error"); }
+});
+
+els.btnTopUp.addEventListener("click", () => {
+  els.topUpPanel.classList.remove("hidden");
+  els.topUpAmount.focus();
+});
+els.cancelTopUp.addEventListener("click", () => {
+  els.topUpForm.reset();
+  els.topUpError.classList.add("hidden");
+  els.topUpPanel.classList.add("hidden");
+});
+els.topUpForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  els.topUpError.classList.add("hidden");
+  try {
+    const amount = Number(els.topUpAmount.value);
+    await Api.topUpSession(sessionId, amount);
+    els.topUpForm.reset();
+    els.topUpPanel.classList.add("hidden");
+    toast("Paper balance topped up", "success");
+    refresh();
+  } catch (err) {
+    els.topUpError.textContent = err.message;
+    els.topUpError.classList.remove("hidden");
+  }
 });
 
 els.addWalletForm.addEventListener("submit", async (e) => {

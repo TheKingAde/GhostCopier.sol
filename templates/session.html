@@ -13,11 +13,25 @@
     <p class="page-sub" id="session-error-banner"></p>
   </div>
   <div class="session-controls">
+    <button class="btn btn-primary" id="btn-top-up" title="Add paper funds">Top up</button>
     <button class="btn btn-ghost" id="btn-start" title="Start">Start</button>
     <button class="btn btn-ghost" id="btn-pause" title="Pause">Pause</button>
     <button class="btn btn-ghost" id="btn-stop" title="Stop">Stop</button>
     <button class="btn btn-danger" id="btn-delete" title="Delete session">Delete</button>
   </div>
+</section>
+
+<section class="panel top-up-panel hidden" id="top-up-panel">
+  <form id="form-top-up" class="top-up-form">
+    <label class="field">
+      <input type="number" id="top-up-amount" min="0.01" step="0.01" placeholder="100.00" required>
+    </label>
+    <div class="top-up-actions">
+      <button type="submit" class="btn btn-primary">Confirm top up</button>
+      <button type="button" class="btn btn-ghost" id="btn-cancel-top-up">Cancel</button>
+    </div>
+    <div class="form-error hidden" id="top-up-error"></div>
+  </form>
 </section>
 
 <section class="balance-grid">
