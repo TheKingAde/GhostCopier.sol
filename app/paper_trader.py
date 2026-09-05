@@ -131,13 +131,24 @@ async def get_token_prices_usd(mints: list[str]) -> dict[str, float]:
     if not mints:
         return {}
     async with httpx.AsyncClient(timeout=10) as client:
-        resp = await client.get(
-            "https://price.jup.ag/v6/price",
-            params={"ids": ",".join(mints)},
-        )
-        resp.raise_for_status()
-        data = resp.json().get("data", {})
-        return {mint: info["price"] for mint, info in data.items() if info}
+        try:
+            resp = await client.get(
+                "https://lite-api.jup.ag/price/v3",
+                params={"ids": ",".join(mints)},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            return {
+                mint: info["usdPrice"]
+                for mint, info in data.items()
+                if info and "usdPrice" in info
+            }
+        except Exception as exc:
+            import logging
+            logging.getLogger("ghostcopier.solana_client").warning(
+                "token price lookup failed: %s", exc
+            )
+            return {}
 
 
 async def session_summary(session: dict):
