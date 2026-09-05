@@ -120,22 +120,24 @@ async def _poll_wallet(session: dict, wallet: dict, client: SolanaClient):
     if not new_sigs:
         return
 
+    last_success = None
     for sig_info in new_sigs:
         signature = sig_info["signature"]
         if sig_info.get("err"):
+            last_success = signature
             continue
         try:
             tx = await client.get_transaction(signature)
         except Exception as exc:
             log.warning("failed to fetch tx %s: %s", signature, exc)
-            continue
+            break  # stop here — don't skip past it, retry from this point next poll
 
         swap = parse_swap_for_wallet(tx, wallet["address"])
         if swap:
-            # re-fetch session each iteration: balance may have changed
-            # from a prior swap earlier in this same batch
             fresh_session = await db.get_session(session["id"])
             if fresh_session and fresh_session["status"] == "running":
                 await paper_trader.apply_swap(fresh_session, wallet["address"], signature, swap)
+        last_success = signature
 
-    await db.set_wallet_last_signature(wallet["id"], new_sigs[-1]["signature"])
+    if last_success:
+        await db.set_wallet_last_signature(wallet["id"], last_success)
