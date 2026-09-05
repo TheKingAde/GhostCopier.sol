@@ -159,6 +159,7 @@ async def session_summary(session: dict):
     mints = [p["token_mint"] for p in positions]
     live_prices = await get_token_prices_usd(mints)
     for p in positions:
+        p["cost_value_usd"] = p["amount"] * p["avg_cost_usd"]
         live_price = live_prices.get(p["token_mint"])
         p["market_value_usd"] = p["amount"] * live_price if live_price else p["cost_value_usd"]
         p["unrealized_pnl_usd"] = p["market_value_usd"] - p["cost_value_usd"]
