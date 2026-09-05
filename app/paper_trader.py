@@ -9,7 +9,6 @@ record + updated position + updated balance.
 Nothing here ever touches a real wallet - it is pure bookkeeping against
 the numbers in the sessions/positions/trades tables.
 """
-import httpx
 from . import db
 from .sizing import buy_portion, sell_portion
 from .solana_client import get_sol_price_usd, get_token_symbol
@@ -127,46 +126,21 @@ async def _apply_sell(session, wallet_address, tx_signature, swap, sol_price, fr
     return trade_id
 
 
-async def get_token_prices_usd(mints: list[str]) -> dict[str, float]:
-    if not mints:
-        return {}
-    async with httpx.AsyncClient(timeout=10) as client:
-        try:
-            resp = await client.get(
-                "https://lite-api.jup.ag/price/v3",
-                params={"ids": ",".join(mints)},
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            return {
-                mint: info["usdPrice"]
-                for mint, info in data.items()
-                if info and "usdPrice" in info
-            }
-        except Exception as exc:
-            import logging
-            logging.getLogger("ghostcopier.solana_client").warning(
-                "token price lookup failed: %s", exc
-            )
-            return {}
-
-
 async def session_summary(session: dict):
     """Adds live USD valuation, unrealized PnL, and positions to a session dict."""
     sol_price = await get_sol_price_usd()
     positions = await db.list_positions(session["id"])
 
-    mints = [p["token_mint"] for p in positions]
-    live_prices = await get_token_prices_usd(mints)
     for p in positions:
+        # Without live per-token pricing we value holdings at cost basis;
+        # unrealized PnL for open positions is therefore shown as 0 unless
+        # a price feed is wired in. This keeps the number honest instead
+        # of guessing.
         p["cost_value_usd"] = p["amount"] * p["avg_cost_usd"]
-        live_price = live_prices.get(p["token_mint"])
-        p["market_value_usd"] = p["amount"] * live_price if live_price else p["cost_value_usd"]
-        p["unrealized_pnl_usd"] = p["market_value_usd"] - p["cost_value_usd"]
 
     sol_balance = session["sol_balance"]
     balance_usd = sol_balance * sol_price
-    holdings_value_usd = sum(p["market_value_usd"] for p in positions)
+    holdings_value_usd = sum(p["cost_value_usd"] for p in positions)
     contributed_usd = session["start_amount_usd"] + session.get("deposited_amount_usd", 0)
     total_value_usd = balance_usd + holdings_value_usd
     pnl_usd = total_value_usd - contributed_usd
