@@ -6,12 +6,6 @@ wallets live on-chain and mirrors their buys/sells into a fake portfolio
 so you can see how "copying the whale" would have actually gone — with
 zero real money or private keys involved.
 
-## Stack
-
-- **Backend:** Python, Quart (async Flask), aiosqlite (SQLite), httpx
-- **Frontend:** vanilla JS/HTML/CSS (no build step), gmgn-inspired dark
-  trading-terminal theme with a "ghost" signature accent
-
 ## How it works
 
 1. **Session** = a starting USD balance (converted to SOL at the current
@@ -67,8 +61,6 @@ and **fee** percentages, applied against the trade price in the
 direction that hurts you (buys pay slightly more, sells receive slightly
 less) — so results aren't unrealistically clean.
 
-## Things worth knowing (and a few I added beyond the brief)
-
 - **Idempotent by transaction signature** — each `(session, tx, token,
   side)` triple is unique in the DB, so re-polling the same signature
   (or restarting the app) never double-counts a trade.
@@ -85,7 +77,7 @@ less) — so results aren't unrealistically clean.
   out directly in the UI rather than faking a number.
 - **Address validation** happens both client- and server-side (base58 +
   32-byte decode check) before a wallet can be added.
-- **Start/Pause/Stop** are distinct: Stop fully halts polling and resets
+- **Top up/Start/Pause/Stop** are distinct: Stop fully halts polling and resets
   wallet "last seen" tracking is preserved; Pause just idles the loop.
   Sessions can be resumed later without losing history or positions.
 - **Multiple wallets per session** are fully supported, addable and
@@ -95,16 +87,6 @@ less) — so results aren't unrealistically clean.
 - **No private keys, ever.** This tool only ever reads public on-chain
   data — there is nothing here that could sign or broadcast a real
   transaction.
-
-### Natural next steps (not built, to keep scope sane)
-
-- A live token price feed for accurate unrealized PnL on open positions.
-- WebSocket/SSE push instead of polling the API every few seconds.
-- CSV export of trade history.
-- Multi-wallet trade collision handling (two copied wallets buying the
-  same token within a poll window currently just applies both trades in
-  order — fine for most cases, but worth a dedicated queue if you're
-  copying many high-frequency wallets at once).
 
 ## Project layout
 
