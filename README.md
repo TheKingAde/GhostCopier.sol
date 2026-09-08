@@ -3,7 +3,7 @@
 Paper copy-trading simulator for Solana wallets. Point it at one or more
 wallet addresses, give it a starting USD balance, and it watches those
 wallets live on-chain and mirrors their buys/sells into a fake portfolio
-so you can see how "copying the whale" would have actually gone — with
+so you can see how "copying the whale" would have actually gone with
 zero real money or private keys involved.
 
 ## How it works
@@ -41,7 +41,7 @@ Open `http://localhost:5000`.
 ### ⚠️ About the RPC endpoint
 
 The public `api.mainnet-beta.solana.com` endpoint is rate limited and
-will cause missed or delayed trades under any real use — it's only fine
+will cause missed or delayed trades under any real use it's only fine
 for quick local testing with a low poll frequency. For anything real,
 get a free API key from **Helius**, **QuickNode**, or **Triton** and set
 `SOLANA_RPC_URL` in `.env` to your dedicated endpoint.
@@ -61,21 +61,21 @@ Set per-session when you create it:
 Every session also has independently configurable **simulated slippage**
 and **fee** percentages, applied against the trade price in the
 direction that hurts you (buys pay slightly more, sells receive slightly
-less) — so results aren't unrealistically clean.
+less) so results aren't unrealistically clean.
 
-- **Idempotent by transaction signature** — each `(session, tx, token,
+- **Idempotent by transaction signature** each `(session, tx, token,
   side)` triple is unique in the DB, so re-polling the same signature
   (or restarting the app) never double-counts a trade.
 - **Skipped trades are recorded, not silently dropped.** If a wallet
   sells a token the session never bought, or a buy can't be sized
   because the session is out of balance, a `SKIPPED` row is still
-  written with a `note` explaining why — so the trade history is a
+  written with a `note` explaining why so the trade history is a
   complete, honest log of everything the copied wallet did.
 - **Realized vs. unrealized PnL.** Realized PnL accrues on sells (actual
   SOL back vs. cost basis). Open positions are currently valued at cost
   basis (no live per-token price feed is wired in), so unrealized PnL on
   *still-open* positions reads as flat until you plug in a token price
-  API (Birdeye/Jupiter Price API are natural choices) — this is called
+  API (Birdeye/Jupiter Price API are natural choices) this is called
   out directly in the UI rather than faking a number.
 - **Address validation** happens both client- and server-side (base58 +
   32-byte decode check) before a wallet can be added.
@@ -87,7 +87,7 @@ less) — so results aren't unrealistically clean.
   records exactly which wallet it was copied from ("Copied from"
   column).
 - **No private keys, ever.** This tool only ever reads public on-chain
-  data — there is nothing here that could sign or broadcast a real
+  data. there is nothing here that could sign or broadcast a real
   transaction.
 
 ## Project layout
