@@ -140,12 +140,22 @@ function renderTrades(trades) {
       <td class="mono">${t.token_amount ? Fmt.num(t.token_amount) : "—"}</td>
       <td class="mono">${t.price_usd_per_token ? "$" + Fmt.num(t.price_usd_per_token, 6) : "—"}</td>
       <td class="mono">${t.sol_amount ? Fmt.sol(t.sol_amount, 4) : "—"}</td>
-      <td class="mono">${t.sol_amount ? Fmt.usd(t.sol_amount * (t.sol_price_usd || 0)) : "—"}</td>
+      <td class="mono">${tradeValueUsd(t)}</td>
       <td><a class="copied-from" href="${Fmt.solscanAddr(t.source_wallet)}" target="_blank" rel="noopener">${Fmt.shortAddr(t.source_wallet)}</a></td>
       <td class="mono">${t.session_sol_balance_after !== null ? Fmt.sol(t.session_sol_balance_after, 3) : "—"}</td>
       <td><a class="solscan-link" href="${Fmt.solscanTx(t.tx_signature)}" target="_blank" rel="noopener">view ↗</a></td>
     </tr>
   `).join("");
+}
+
+function tradeValueUsd(trade) {
+  if (trade.token_amount && trade.price_usd_per_token) {
+    return Fmt.usd(trade.token_amount * trade.price_usd_per_token);
+  }
+  if (trade.sol_amount && trade.sol_price_usd) {
+    return Fmt.usd(trade.sol_amount * trade.sol_price_usd);
+  }
+  return "—";
 }
 
 // ------------------------------------------------------------- controls
