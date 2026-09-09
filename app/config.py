@@ -47,10 +47,6 @@ class Config:
         "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
     )
     
-    # Birdeye API for live token prices
-    BIRDEYE_API_KEY = os.getenv("BIRDEYE_API_KEY", "")
-    BIRDEYE_PRICE_URL = "https://public-api.birdeye.so/defi/token_price"
-    
     # Price history limit for volatility calculations
     PRICE_HISTORY_LIMIT = _i("PRICE_HISTORY_LIMIT", 100)
     
