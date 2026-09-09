@@ -25,6 +25,7 @@ class SwapEvent:
     sol_amount: float    # amount of SOL that moved (positive number)
     wallet_sol_pre: float
     wallet_token_pre: float  # source wallet's pre-trade balance of token_mint
+    program_id: str | None = None  # DEX program, when present in the RPC response
 
 
 def _find_account_index(account_keys, address):
@@ -35,6 +36,24 @@ def _find_account_index(account_keys, address):
     return None
 
 
+def _find_program_id(message: dict) -> str | None:
+    """Return the most likely DEX program ID from parsed instructions."""
+    candidates = []
+    for instruction in message.get("instructions", []):
+        if isinstance(instruction, dict):
+            program_id = instruction.get("programId")
+            if program_id:
+                candidates.append(program_id)
+    for program_id in candidates:
+        if program_id not in {
+            "11111111111111111111111111111111",  # System Program
+            "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",  # SPL Token
+            "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",  # Associated Token
+        }:
+            return program_id
+    return candidates[0] if candidates else None
+
+
 def parse_swap_for_wallet(tx: dict, wallet_address: str) -> SwapEvent | None:
     if not tx or not tx.get("meta") or tx["meta"].get("err") is not None:
         return None  # failed tx, or nothing to parse
@@ -42,6 +61,7 @@ def parse_swap_for_wallet(tx: dict, wallet_address: str) -> SwapEvent | None:
     meta = tx["meta"]
     message = tx["transaction"]["message"]
     account_keys = message.get("accountKeys", [])
+    program_id = _find_program_id(message)
 
     idx = _find_account_index(account_keys, wallet_address)
     if idx is None:
@@ -95,6 +115,7 @@ def parse_swap_for_wallet(tx: dict, wallet_address: str) -> SwapEvent | None:
             sol_amount=abs(sol_delta),
             wallet_sol_pre=wallet_sol_pre,
             wallet_token_pre=pre_tokens.get(main_mint, 0.0),
+            program_id=program_id,
         )
     if sol_delta > 0 and token_delta < 0:
         # Sold token, received SOL => SELL
@@ -105,5 +126,6 @@ def parse_swap_for_wallet(tx: dict, wallet_address: str) -> SwapEvent | None:
             sol_amount=sol_delta,
             wallet_sol_pre=wallet_sol_pre,
             wallet_token_pre=pre_tokens.get(main_mint, 0.0),
+            program_id=program_id,
         )
     return None
