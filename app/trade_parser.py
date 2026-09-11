@@ -16,6 +16,19 @@ from .solana_client import SOL_MINT, LAMPORTS_PER_SOL
 
 DUST_SOL = 0.0005  # ignore SOL deltas below this (fees/rent noise)
 
+# Base/quote currencies. These are never the asset being copy-traded -
+# they're the thing being spent or received. Multihop routes (Jupiter,
+# etc.) often leave a small non-zero leftover delta on these ATAs mid-swap
+# (partial fills, referral skims, rounding), which can outweigh the real
+# target token's delta and get misidentified as "the" trade if not
+# excluded here.
+QUOTE_MINTS = {
+    SOL_MINT,                                        # SOL (wrapped)
+    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",   # USDC
+    "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",   # USDT
+    "USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB",    # USD1 (World Liberty Financial)
+}
+
 
 @dataclass
 class SwapEvent:
@@ -76,14 +89,18 @@ def parse_swap_for_wallet(tx: dict, wallet_address: str) -> SwapEvent | None:
     wallet_sol_pre = pre_balances[idx] / LAMPORTS_PER_SOL
 
     # Build pre/post SPL token balance maps for this wallet: mint -> amount
+    # Quote/base currencies (SOL, USDC, USDT, USD1) are excluded here -
+    # they're never the asset being copy-traded, and including them lets a
+    # multihop route's leftover quote-currency delta get misidentified as
+    # the main trade (see QUOTE_MINTS above).
     def token_map(entries):
         out = {}
         for e in entries or []:
             if e.get("owner") != wallet_address:
                 continue
             mint = e.get("mint")
-            if mint == SOL_MINT:
-                continue  # wrapped SOL is not a separate asset - native SOL delta already covers it
+            if mint in QUOTE_MINTS:
+                continue
             amt = e.get("uiTokenAmount", {})
             out[mint] = float(amt.get("uiAmount") or 0.0)
         return out
@@ -98,7 +115,7 @@ def parse_swap_for_wallet(tx: dict, wallet_address: str) -> SwapEvent | None:
             token_deltas[mint] = delta
 
     if not token_deltas:
-        return None  # pure SOL transfer, staking, etc - not a swap
+        return None  # pure SOL/stablecoin movement - not a copyable swap
 
     # Pick the token whose magnitude of change is largest (main leg of the swap)
     main_mint = max(token_deltas, key=lambda m: abs(token_deltas[m]))
