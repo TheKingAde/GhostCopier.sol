@@ -123,7 +123,7 @@ function renderPositions(positions) {
       <td>${escapeHtml(p.token_symbol || Fmt.shortAddr(p.token_mint))}</td>
       <td class="mono">${Fmt.num(p.amount)}</td>
       <td class="mono">$${Fmt.num(p.avg_cost_usd, 6)}</td>
-      <td class="mono">${Fmt.usd(p.cost_value_usd)}</td>
+      <td class="mono">${Fmt.usd(p.market_value_usd)}</td>
     </tr>
   `).join("");
 }

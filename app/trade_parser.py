@@ -81,8 +81,11 @@ def parse_swap_for_wallet(tx: dict, wallet_address: str) -> SwapEvent | None:
         for e in entries or []:
             if e.get("owner") != wallet_address:
                 continue
+            mint = e.get("mint")
+            if mint == SOL_MINT:
+                continue  # wrapped SOL is not a separate asset - native SOL delta already covers it
             amt = e.get("uiTokenAmount", {})
-            out[e["mint"]] = float(amt.get("uiAmount") or 0.0)
+            out[mint] = float(amt.get("uiAmount") or 0.0)
         return out
 
     pre_tokens = token_map(meta.get("preTokenBalances"))
